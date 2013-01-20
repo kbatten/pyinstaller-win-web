@@ -8,4 +8,5 @@ Simply drag the project into the window and the tool will compile and create a z
 
 ## Requirements:
 
-    flask
+    Flask
+    sh
