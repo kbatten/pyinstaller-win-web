@@ -58,7 +58,7 @@
     if (this.readyState == 4) {
       if (this.status == 200) {
         processing(0);
-        window.location.href = '/download/' + this.responseText + '/tmp.zip';
+        window.location.href = '/download/' + this.responseText + '/package.zip';
       }
     }
 
@@ -76,7 +76,7 @@
   //   evt.loaded = bytes processed
   //   evt.total = total bytes to be processed
   // data is compressed with zlib deflate, then base64 encoded
-  function uploadCompressedData(data, compressionCallback, uploadCallback) {
+  function uploadCompressedData(data, filename, compressionCallback, uploadCallback) {
     // modified from https://developer.mozilla.org/en/using_files_from_web_applications
     function uploadDataAsync() {
       var dataSize = 0;
@@ -95,7 +95,7 @@
         dataSize += chunk.length;
 
         body += "--" + boundary + "\r\n";
-  body += "Content-Disposition: form-data; name=\"Filedata\"; filename=\""+(parseInt(i,10)+1)+"/"+(c_compressedData.length)+"\"\r\n";
+  body += "Content-Disposition: form-data; name=\"Filedata\"; filename=\"" + filename + "\"\r\n";
         body += "Content-Type: application/octet-stream\r\n\r\n";
         body += chunk + "\r\n";
       }
@@ -197,7 +197,7 @@
     var reader = new FileReader();
 
     reader.onload = function(e) {
-      uploadCompressedData(e.target.result, compressionUpdate, uploadUpdate);
+      uploadCompressedData(e.target.result, f.name, compressionUpdate, uploadUpdate);
    };
 
     reader.readAsText(f);

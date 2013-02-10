@@ -30,7 +30,7 @@ def download(fileid, filename):
     m = re.search(pattern, fileid)
     if m.group(0) != fileid:
         return "error"
-    with file('/tmp/piww_'+fileid+'/dist/tmp.zip') as f:
+    with file('/tmp/piww_'+fileid+'/dist/package.zip') as f:
         data = f.read()
 
     cd('/tmp')
@@ -38,15 +38,25 @@ def download(fileid, filename):
     return Response(data,
                     mimetype="application/octet-stream",
                     headers={"Content-Disposition":
-                                 "attachment;filename=tmp.zip"})
+                                 "attachment;filename=package.zip"})
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'GET':
         return render_template('upload.html')
     else:
+        filename = request.files['Filedata'].filename
         body = request.files['Filedata'].read()
         
+        pattern = '^([^<>:"/\|?*]+)\.py$'
+        m = re.search(pattern, filename)
+        filebase = m.group(1)
+        filename_py = filebase+'.py'
+        filename_exe = filebase+'.exe'
+
+        print filename_py
+        print filename_exe
+
         len_wire = len(body)
         len_data = 0
 
@@ -71,12 +81,12 @@ def upload():
         cd('/tmp')
         mkdir('piww_'+fileid)
         cd('piww_'+fileid)
-        with file('/tmp/piww_'+fileid+'/tmp.py', 'w') as f:
+        with file('/tmp/piww_'+fileid+'/'+filename_py, 'w') as f:
             f.write(uncompressed)
-        pyinstaller_win('tmp.py')
+        pyinstaller_win(filename_py)
         cd('dist')
-        zipf = zipfile.ZipFile('tmp.zip', 'w', zipfile.ZIP_DEFLATED)
-        zipf.write('tmp.exe')
+        zipf = zipfile.ZipFile('package.zip', 'w', zipfile.ZIP_DEFLATED)
+        zipf.write(filename_exe)
         zipf.close()
 
         return fileid
