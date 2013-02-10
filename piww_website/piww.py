@@ -27,8 +27,8 @@ def download(fileid, filename):
     # b4243103-f33c-4a58-a960-ec18f2347c76
     pattern = "([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})"
     m = re.search(pattern, fileid)
-    if m.group(0) != fileid:
-        return "error"
+    if not m or m.group(0) != fileid:
+        return "download fileid error"
     with file('/tmp/piww_'+fileid+'/dist/package.zip') as f:
         data = f.read()
 
@@ -49,6 +49,8 @@ def upload():
         
         pattern = '^([^<>:"/\|?*]+)\.py$'
         m = re.search(pattern, filename)
+        if not m:
+            return "upload filename error"
         filebase = m.group(1)
         filename_py = filebase+'.py'
         filename_exe = filebase+'.exe'
