@@ -24,8 +24,7 @@ def root():
 
 @app.route('/download/<fileid>/<filename>')
 def download(fileid, filename):
-    # b4243103-f33c-4a58-a960-ec18f2347c76
-    pattern = "([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})"
+    pattern = "^([a-zA-Z0-9-_]+)$"
     m = re.search(pattern, fileid)
     if not m or m.group(0) != fileid:
         return "download fileid error"
@@ -78,7 +77,7 @@ def upload():
         else:
             print 'compression: {len_wire}/{len_data} = {compression}%'.format(len_wire=len_wire, len_data=len_data, compression='inf')
         
-        fileid = str(uuid.uuid4())
+        fileid = base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip('=')
         cd('/tmp')
         mkdir('piww_'+fileid)
         cd('piww_'+fileid)
