@@ -86,6 +86,8 @@ def upload():
         cd('piww_'+fileid)
         with file('/tmp/piww_'+fileid+'/'+filename_py, 'w') as f:
             f.write(uncompressed)
+        # pyinstaller-win is a wrapper to wine running python.exe pyinstaller
+        #  it takes a python file as a parameter and outputs an exe file in 'dist'
         pyinstaller_win(filename_py)
         cd('dist')
         zipf = zipfile.ZipFile('package.zip', 'w', zipfile.ZIP_DEFLATED)
