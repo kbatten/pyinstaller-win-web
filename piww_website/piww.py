@@ -98,4 +98,16 @@ def upload():
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=False)
+    debug = False
+    standalone = True
+    port = 8000
+
+    if standalone:
+        # http://stackoverflow.com/questions/4239825/static-files-in-flask-robot-txt-sitemap-xml-mod-wsgi
+        from werkzeug import SharedDataMiddleware
+        import os
+        app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
+                '/': os.path.join(os.path.dirname(__file__), 'static')
+                })
+
+    app.run(host='0.0.0.0', port=port, debug=debug)
