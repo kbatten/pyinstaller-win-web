@@ -8,7 +8,6 @@ import re
 import base64
 import struct
 import zlib
-import subprocess
 import zipfile
 
 from sh import cd, mkdir, rm, pyinstaller_win
