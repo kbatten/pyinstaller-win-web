@@ -9,6 +9,7 @@ import base64
 import struct
 import zlib
 import subprocess
+import zipfile
 
 from sh import cd, mkdir, rm, pyinstaller_win
 from flask import Flask, render_template, redirect, url_for, request, Response
@@ -29,7 +30,7 @@ def download(fileid, filename):
     m = re.search(pattern, fileid)
     if m.group(0) != fileid:
         return "error"
-    with file('/tmp/piww_'+fileid+'/dist/tmp.exe') as f:
+    with file('/tmp/piww_'+fileid+'/dist/tmp.zip') as f:
         data = f.read()
 
     cd('/tmp')
@@ -37,7 +38,7 @@ def download(fileid, filename):
     return Response(data,
                     mimetype="application/octet-stream",
                     headers={"Content-Disposition":
-                                 "attachment;filename=tmp.exe"})
+                                 "attachment;filename=tmp.zip"})
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
@@ -66,10 +67,6 @@ def upload():
         else:
             print 'compression: {len_wire}/{len_data} = {compression}%'.format(len_wire=len_wire, len_data=len_data, compression='inf')
         
-#        subprocess.call(['bash', '-c', 'rm -rf /tmp/pyinstaller-win ; mkdir /tmp/pyinstaller-win'])
-#        with file('/tmp/pyinstaller-win/tmp.py', 'w') as f:
-#            f.write(uncompressed)
-#        subprocess.call(['bash', '-c', 'cd /tmp/pyinstaller-win ; pyinstaller-win tmp.py'])
         fileid = str(uuid.uuid4())
         cd('/tmp')
         mkdir('piww_'+fileid)
@@ -77,6 +74,10 @@ def upload():
         with file('/tmp/piww_'+fileid+'/tmp.py', 'w') as f:
             f.write(uncompressed)
         pyinstaller_win('tmp.py')
+        cd('dist')
+        zipf = zipfile.ZipFile('tmp.zip', 'w', zipfile.ZIP_DEFLATED)
+        zipf.write('tmp.exe')
+        zipf.close()
 
         return fileid
     
