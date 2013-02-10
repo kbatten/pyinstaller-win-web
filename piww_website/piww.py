@@ -9,6 +9,7 @@ import base64
 import struct
 import zlib
 import zipfile
+import logging
 
 from sh import cd, mkdir, rm, pyinstaller_win
 from flask import Flask, render_template, redirect, url_for, request, Response
@@ -17,6 +18,7 @@ import fastlz
 
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
 
 @app.route('/')
 def root():
@@ -27,6 +29,7 @@ def download(fileid, filename):
     pattern = "^([a-zA-Z0-9-_]+)$"
     m = re.search(pattern, fileid)
     if not m or m.group(0) != fileid:
+        logging.error("download fileid error")
         return "download fileid error"
     with file('/tmp/piww_'+fileid+'/dist/package.zip') as f:
         data = f.read()
@@ -49,13 +52,13 @@ def upload():
         pattern = '^([^<>:"/\|?*]+)\.py$'
         m = re.search(pattern, filename)
         if not m:
+            logging.error("upload filename error")
             return "upload filename error"
         filebase = m.group(1)
         filename_py = filebase+'.py'
         filename_exe = filebase+'.exe'
 
-        print filename_py
-        print filename_exe
+        logging.info('processing: ' + filebase)
 
         len_wire = len(body)
         len_data = 0
@@ -73,9 +76,9 @@ def upload():
         len_data += len(uncompressed)
 
         if len_data:
-            print 'compression: {len_wire}/{len_data} = {compression}%'.format(len_wire=len_wire, len_data=len_data, compression=int(100.0 * float(len_wire)/float(len_data)))
+            logging.info('compression: {len_wire}/{len_data} = {compression}%'.format(len_wire=len_wire, len_data=len_data, compression=int(100.0 * float(len_wire)/float(len_data))))
         else:
-            print 'compression: {len_wire}/{len_data} = {compression}%'.format(len_wire=len_wire, len_data=len_data, compression='inf')
+            logging.info('compression: {len_wire}/{len_data} = {compression}%'.format(len_wire=len_wire, len_data=len_data, compression='inf'))
         
         fileid = base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip('=')
         cd('/tmp')
