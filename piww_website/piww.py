@@ -10,9 +10,10 @@ import struct
 import zlib
 import zipfile
 import logging
+import os
 
 from sh import cd, mkdir, rm, pyinstaller_win
-from flask import Flask, render_template, redirect, url_for, request, Response
+from flask import Flask, render_template, redirect, url_for, request, Response, send_from_directory
 
 import fastlz
 
@@ -21,8 +22,14 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
 @app.route('/favicon.ico')
-def favicon():
-    return redirect(url_for('static', filename='favicon.ico'))
+def favicon_ico():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico')
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'robots.txt')
 
 @app.route('/')
 def root():
