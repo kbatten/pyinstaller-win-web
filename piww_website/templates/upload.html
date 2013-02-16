@@ -11,12 +11,12 @@
       uploadUpdate only fires on "load" in firefox
   -->
   <head>
-    <link href="/favicon.png" rel="shortcut icon" type="image/png"/>
-    <link href="/favicon32.png" rel="shortcut icon" type="image/png"/>
-    <link href="/favicon64.png" rel="shortcut icon" type="image/png"/>
-    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+    <link href="{{ url_for('static', filename='favicon.png') }}" rel="shortcut icon" type="image/png"/>
+    <link href="{{ url_for('static', filename='favicon32.png') }}" rel="shortcut icon" type="image/png"/>
+    <link href="{{ url_for('static', filename='favicon64.png') }}" rel="shortcut icon" type="image/png"/>
+    <link href="{{ url_for('static', filename='favicon.ico') }}" rel="shortcut icon" type="image/x-icon"/>
 
-    <script type="text/javascript" src="/fastlz/compressor.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='fastlz/compressor.js') }}"></script>
     <style>
       #drop_zone {
       border: 2px dashed #bbb;

@@ -20,6 +20,10 @@ import fastlz
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
+@app.route('/favicon.ico')
+def favicon():
+    return redirect(url_for('static', filename='favicon.ico'))
+
 @app.route('/')
 def root():
     return redirect(url_for('upload'))
@@ -98,16 +102,4 @@ def upload():
     
 
 if __name__ == '__main__':
-    debug = False
-    standalone = True
-    port = 8000
-
-    if standalone:
-        # http://stackoverflow.com/questions/4239825/static-files-in-flask-robot-txt-sitemap-xml-mod-wsgi
-        from werkzeug import SharedDataMiddleware
-        import os
-        app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
-                '/': os.path.join(os.path.dirname(__file__), 'static')
-                })
-
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    app.run(host='0.0.0.0', port=8000, debug=False)
