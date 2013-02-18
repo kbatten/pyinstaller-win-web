@@ -21,6 +21,16 @@ import fastlz
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
+def verify_workspace_id(workspace_id):
+    pattern = "^([a-zA-Z0-9-_]+)$"
+    m = re.search(pattern, workspace_id)
+    if not m or m.group(0) != workspace_id:
+        logging.error("workspace_id error")
+        return False
+    return True
+
+
 @app.route('/favicon.ico')
 def favicon_ico():
     return send_from_directory(os.path.join(app.root_path, 'static'),
@@ -33,7 +43,22 @@ def robots_txt():
 
 @app.route('/')
 def root():
-    return redirect(url_for('upload'))
+    return redirect(url_for('workspace'))
+
+
+@app.route('/workspace')
+@app.route('/workspace/<workspace_id>')
+def workspace(workspace_id=''):
+    if not workspace_id:
+        workspace_id = base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip('=')
+        logging.info("creating new workspace: " + workspace_id)
+        return redirect(url_for('workspace') + '/' + workspace_id)
+
+    if not verify_workspace_id(workspace_id):
+        return redirect(url_for('workspace'))
+    
+    return render_template('workspace.html')
+
 
 @app.route('/download/<fileid>/<filename>')
 def download(fileid, filename):

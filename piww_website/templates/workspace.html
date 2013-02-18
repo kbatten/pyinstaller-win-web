@@ -1,0 +1,57 @@
+<html>
+  <head>
+    <script type="text/javascript" language="Javascript" 
+            src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js">
+    </script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='workspace/workspace.css') }}" />  
+    <script type="text/javascript" src="{{ url_for('static', filename='workspace/workspace.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='workspace/upload.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='fastlz/compressor.js') }}"></script>
+  </head>
+  <body>
+    <div id="header"></div>
+
+    <div id="body">
+      <div id="outer">
+        <div id="drop_zone_code" class="upload_zone">
+           <img src="{{ url_for('static', filename='workspace/python_text.png') }}"></img>
+        </div>
+        <img id="lock_code" class="lock" src="{{ url_for('static', filename='workspace/unlocked.png') }}" />
+      </div>
+
+      <div id="outer">
+        <img id="lock_code" class="lock" src="{{ url_for('static', filename='workspace/draganddrop_text.png') }}" />
+      </div>
+
+      <div id="outer">
+        <div id="drop_zone_icons" class="upload_zone">
+          <img src="{{ url_for('static', filename='workspace/icons_text.png') }}" />
+        </div>
+        <img id="lock_icons" class="lock" src="{{ url_for('static', filename='workspace/unlocked.png') }}" />
+      </div>
+
+      <div id="outer">
+        <div class="create_zone">
+          <div id="create">
+            <img src="{{ url_for('static', filename='workspace/create_notready_text.png') }}" />
+          </div>
+        </div>
+      </div>
+      <output id="debug"></output>
+      <div id="padding"></div>
+      <div id="footer">
+        <a href='http://github.com/kbatten/pyinstaller-win-web'><img src="{{ url_for('static', filename='workspace/piww_text.png') }}"></a>
+      </div>
+    </div>
+    <script language="javascript">
+      $("#drop_zone_code").bind("drop", handleDrop)
+      $("#drop_zone_code").bind("dragover", false)
+
+      $("#drop_zone_icons").bind("drop", handleDrop)
+      $("#drop_zone_icons").bind("dragover", false)
+
+      $("#lock_code").click(handleLockClick);
+      $("#lock_icons").click(handleLockClick);
+    </script>
+  </body>
+</html>
