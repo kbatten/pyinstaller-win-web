@@ -1,13 +1,13 @@
-$ = function(id) { return document.getElementById(id); };
+e = function(id) { return document.getElementById(id); };
 
 // only allow one file to be compressed/uploaded at a time
 var g_uploading = false;
 
 // not a real event
 function compressionUpdate(evt) {
-    $('drop_zone').innerHTML = Math.ceil(50 * (evt.loaded / evt.total)) + "%";
+    e('debug').innerHTML = Math.ceil(50 * (evt.loaded / evt.total)) + "%";
     if (evt.loaded == evt.total) {
-        $('debug').innerHTML += "seconds to compress: " + (((new Date()).getTime() - g_compressStart)/1000) + "<br>";
+        e('debug').innerHTML += "seconds to compress: " + (((new Date()).getTime() - g_compressStart)/1000) + "<br>";
     }
 }
 
@@ -15,7 +15,7 @@ function processing(dots) {
     da = ["", ".", "..", "...", "..", "."];
     dots = dots % 6;
     var i;
-    $('drop_zone').innerHTML = da[dots] + "processing" + da[dots];
+    e('debug').innerHTML = da[dots] + "processing" + da[dots];
     setTimeout("processing(" + (dots + 1) + ")",1000);
 }
 
@@ -28,10 +28,10 @@ function uploadUpdate(evt) {
     }
 
     if (evt.total == evt.loaded) {
-        $('drop_zone').innerHTML = "100%";
+        e('debug').innerHTML = "100%";
         //      g_uploading = false;
     } else {
-      $('drop_zone').innerHTML = 50 + Math.ceil(50 * (evt.loaded / evt.total)) + "%";
+        e('debug').innerHTML = 50 + Math.ceil(50 * (evt.loaded / evt.total)) + "%";
     }
 }
 
@@ -75,8 +75,8 @@ function uploadCompressedData(data, filename, compressionCallback, uploadCallbac
         //      xhr.upload.addEventListener("readystatechange", uploadCallback, false);
         xhr.onreadystatechange = uploadCallback;
 
-        $('debug').innerHTML += "compressed chunks: " + c_compressedData.length + "<br>";
-        $('debug').innerHTML += "compressed size: " + body.length + "<br>";
+        e('debug').innerHTML += "compressed chunks: " + c_compressedData.length + "<br>";
+        e('debug').innerHTML += "compressed size: " + body.length + "<br>";
 
       xhr.send(body);
     }
@@ -157,7 +157,9 @@ function handleFileSelect(evt) {
     }
     g_uploading = true;
 
-    var f = evt.dataTransfer.files[0]; // Grab just the first file as a File object
+    var dataTransfer = evt.dataTransfer || (evt.originalEvent && evt.originalEvent.dataTransfer);
+
+    var f = dataTransfer.files[0]; // Grab just the first file as a File object
     var reader = new FileReader();
 
     reader.onload = function(e) {

@@ -27,7 +27,7 @@
         <div id="drop_zone_icons" class="upload_zone">
           <img src="{{ url_for('static', filename='workspace/icons_text.png') }}" />
         </div>
-        <img id="lock_icons" class="lock" src="{{ url_for('static', filename='workspace/unlocked.png') }}" />
+        <img id="lock_icons" class="lock" src="{{ url_for('static', filename='workspace/locked.png') }}" />
       </div>
 
       <div id="outer">
@@ -44,14 +44,10 @@
       </div>
     </div>
     <script language="javascript">
-      $("#drop_zone_code").bind("drop", handleDrop)
+      $("#drop_zone_code").bind("drop", handleFileSelect)
       $("#drop_zone_code").bind("dragover", false)
 
-      $("#drop_zone_icons").bind("drop", handleDrop)
-      $("#drop_zone_icons").bind("dragover", false)
-
       $("#lock_code").click(handleLockClick);
-      $("#lock_icons").click(handleLockClick);
     </script>
   </body>
 </html>
