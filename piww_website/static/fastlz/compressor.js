@@ -123,20 +123,9 @@ var FastLz = {};
                         if (ip[ref_index++] !== x) { break; } else { ip_index++; }
                     }
                 } else {
-                    for(;;) {
-                        /* safe because the outer check against ip limit */
+                    /* safe because the outer check against ip limit */
+                    while (ip_index < ip_bound_index) {
                         if (ip[ref_index++] !== ip[ip_index++]) { break; }
-                        if (ip[ref_index++] !== ip[ip_index++]) { break; }
-                        if (ip[ref_index++] !== ip[ip_index++]) { break; }
-                        if (ip[ref_index++] !== ip[ip_index++]) { break; }
-                        if (ip[ref_index++] !== ip[ip_index++]) { break; }
-                        if (ip[ref_index++] !== ip[ip_index++]) { break; }
-                        if (ip[ref_index++] !== ip[ip_index++]) { break; }
-                        if (ip[ref_index++] !== ip[ip_index++]) { break; }
-                        while (ip_index < ip_bound_index) {
-                            if (ip[ref_index++] !== ip[ip_index++]) { break; }
-                        }
-                        break;
                     }
                 }
 
