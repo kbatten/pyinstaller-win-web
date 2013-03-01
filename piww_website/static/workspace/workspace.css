@@ -1,11 +1,11 @@
-#body {
+.panel {
     background-image: url("/static/workspace/graphpaper_repeat.png");
     width: 989px;
     height: 848px;
     margin: auto;
 }
 
-#outer {
+.outer {
     padding: 0px 0px;
     text-align: center;
     overflow: hidden;
@@ -44,7 +44,7 @@
     margin: 15px;
 }
 
-#padding {
+.padding {
     height: 58px;
 }
 

@@ -1,33 +1,43 @@
-e = function(id) { return document.getElementById(id); };
+/*global FastLz*/
+/*jslint browser: true*/
+/*jslint plusplus: true, vars: true */
+
+var e = function (id) {
+    "use strict";
+    return document.getElementById(id);
+};
 
 // only allow one file to be compressed/uploaded at a time
 var g_uploading = false;
+var g_compressStart = 0;
 
 // not a real event
 function compressionUpdate(evt) {
+    "use strict";
     e('debug').innerHTML = Math.ceil(50 * (evt.loaded / evt.total)) + "%";
-    if (evt.loaded == evt.total) {
-        e('debug').innerHTML += "seconds to compress: " + (((new Date()).getTime() - g_compressStart)/1000) + "<br>";
+    if (evt.loaded === evt.total) {
+        e('debug').innerHTML += "seconds to compress: " + (((new Date()).getTime() - g_compressStart) / 1000) + "<br>";
     }
 }
 
 function processing(dots) {
-    da = ["", ".", "..", "...", "..", "."];
+    "use strict";
+    var da = ["", ".", "..", "...", "..", "."];
     dots = dots % 6;
-    var i;
     e('debug').innerHTML = da[dots] + "processing" + da[dots];
-    setTimeout("processing(" + (dots + 1) + ")",1000);
+    setTimeout("processing(" + (dots + 1) + ")", 1000);
 }
 
 function uploadUpdate(evt) {
-    if (this.readyState == 4) {
-        if (this.status == 200) {
+    "use strict";
+    if (evt.target.readyState === 4) {
+        if (evt.target.status === 200) {
             processing(0);
-        window.location.href = '/download/' + this.responseText + '/package.zip';
+            window.location.href = '/download/' + evt.target.responseText + '/package.zip';
         }
     }
 
-    if (evt.total == evt.loaded) {
+    if (evt.total === evt.loaded) {
         e('debug').innerHTML = "100%";
         //      g_uploading = false;
     } else {
@@ -42,7 +52,14 @@ function uploadUpdate(evt) {
 //   evt.total = total bytes to be processed
 // data is compressed with zlib deflate, then base64 encoded
 function uploadCompressedData(data, filename, compressionCallback, uploadCallback) {
+    "use strict";
     // modified from https://developer.mozilla.org/en/using_files_from_web_applications
+
+    var c_compressedData = [];
+    var c_evt = [];
+    var c_data = data; // are we duplicating data?
+    var c_chunkSize = 1048576;
+
     function uploadDataAsync() {
         var dataSize = 0;
         var boundary = "yyyyyyyyyyyyyyyyyyyy";
@@ -55,8 +72,8 @@ function uploadCompressedData(data, filename, compressionCallback, uploadCallbac
 
         var i;
 
-        for(i in c_compressedData) {
-        var chunk = btoa(c_compressedData[i]);
+        for (i = 0; i < c_compressedData.length; i++) {
+            var chunk = window.btoa(c_compressedData[i]);
             dataSize += chunk.length;
 
             body += "--" + boundary + "\r\n";
@@ -68,7 +85,7 @@ function uploadCompressedData(data, filename, compressionCallback, uploadCallbac
         body += "--" + boundary + "--";
 
         xhr.open("POST", uri, true);
-        xhr.setRequestHeader("Content-Type", "multipart/form-data; boundary="+boundary);
+        xhr.setRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
 
         xhr.upload.addEventListener("progress", uploadCallback, false);
         xhr.upload.addEventListener("load", uploadCallback, false);
@@ -78,18 +95,20 @@ function uploadCompressedData(data, filename, compressionCallback, uploadCallbac
         e('debug').innerHTML += "compressed chunks: " + c_compressedData.length + "<br>";
         e('debug').innerHTML += "compressed size: " + body.length + "<br>";
 
-      xhr.send(body);
+        xhr.send(body);
     }
 
-    function int32ToBytes(int) {
-        bytes = [];
-        bytes[3] = String.fromCharCode(int & 255);
-        int = int >> 8;
-        bytes[2] = String.fromCharCode(int & 255);
-        int = int >> 8;
-        bytes[1] = String.fromCharCode(int & 255);
-        int = int >> 8;
-        bytes[0] = String.fromCharCode(int & 255);
+    function int32ToBytes(int32) {
+        var bytes = [];
+        /*jslint bitwise: true*/
+        bytes[3] = String.fromCharCode(int32 & 255);
+        int32 = int32 >> 8;
+        bytes[2] = String.fromCharCode(int32 & 255);
+        int32 = int32 >> 8;
+        bytes[1] = String.fromCharCode(int32 & 255);
+        int32 = int32 >> 8;
+        bytes[0] = String.fromCharCode(int32 & 255);
+        /*jslint bitwise: false*/
         return bytes.join("");
     }
 
@@ -98,13 +117,13 @@ function uploadCompressedData(data, filename, compressionCallback, uploadCallbac
         var a = 1;
         var b = 0;
         var i;
-        for(i=0;i<data.length;i++) {
+        for (i = 0; i < data.length; i++) {
             var ascii = data.charCodeAt(i);
             a = (a + ascii) % 65521;
             b = (a + b) % 65521;
         }
 
-      return int32ToBytes(b*65536 + a);
+        return int32ToBytes(b * 65536 + a);
     }
 
     function compressDataChunkFastlz(chunk) {
@@ -116,7 +135,7 @@ function uploadCompressedData(data, filename, compressionCallback, uploadCallbac
         return size + checksum + compressed;
     }
 
-    compressDataChunk = compressDataChunkFastlz;
+    var compressDataChunk = compressDataChunkFastlz;
 
     function compressDataAsync() {
         // compress a data chunk
@@ -130,18 +149,14 @@ function uploadCompressedData(data, filename, compressionCallback, uploadCallbac
             setTimeout(compressDataAsync, 0);
         } else {
             // compression is done, lets trigger upload
-        c_evt.loaded = 0;
+            c_evt.loaded = 0;
             c_evt.total = c_compressedData.length;
             setTimeout(uploadDataAsync, 0);
         }
     }
 
-    var c_compressedData = [];
-    c_data = data; // are we duplicating data?
-    var c_evt = [];
     c_evt.loaded = 0;
     c_evt.total = c_data.length;
-    c_chunkSize = 1048576;
 
     g_compressStart = (new Date()).getTime();
 
@@ -149,6 +164,7 @@ function uploadCompressedData(data, filename, compressionCallback, uploadCallbac
 }
 
 function handleFileSelect(evt) {
+    "use strict";
     evt.stopPropagation();
     evt.preventDefault();
 
@@ -160,16 +176,17 @@ function handleFileSelect(evt) {
     var dataTransfer = evt.dataTransfer || (evt.originalEvent && evt.originalEvent.dataTransfer);
 
     var f = dataTransfer.files[0]; // Grab just the first file as a File object
-    var reader = new FileReader();
+    var reader = new window.FileReader();
 
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         uploadCompressedData(e.target.result, f.name, compressionUpdate, uploadUpdate);
     };
 
     reader.readAsText(f);
-  }
+}
 
 function handleDragOver(evt) {
+    "use strict";
     evt.stopPropagation();
     evt.preventDefault();
 }
