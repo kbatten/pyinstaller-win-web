@@ -4,7 +4,6 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='workspace/workspace.css') }}" />
     <script type="text/javascript" src="{{ url_for('static', filename='workspace/workspace.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='workspace/upload.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='fastlz/compressor.js') }}"></script>
   </head>
   <body>
     <div id="header"></div>
@@ -34,19 +33,44 @@
           </div>
         </div>
       </div>
-      <output id="debug"></output>
       <div class="padding"></div>
       <div id="footer">
         <a href='http://github.com/kbatten/pyinstaller-win-web'><img src="{{ url_for('static', filename='workspace/piww_text.png') }}"></a>
       </div>
     </div>
     <script language="javascript">
-      /*global $, handleFileSelect, handleLockClick*/
+      /*global $, Uploader, handleLockClick, console*/
+      /*jslint browser: true*/
 
-      $("#drop_zone_code").bind("drop", handleFileSelect);
-      $("#drop_zone_code").bind("dragover", false);
+      var code_uploader = new Uploader("/upload", ["py"]);
+      code_uploader.monitor_drop("#drop_zone_code");
+      code_uploader.success(function (response) {
+          "use strict";
+          window.location.href = '/download/' + response + '/package.zip';
+      });
+      code_uploader.progress(function (loaded, total) {
+          "use strict";
+          console.log(100 * loaded / total);
+      });
 
-      $("#lock_code").click(handleLockClick);
+      $("#lock_code").click(function (event) {
+          "use strict";
+
+          // default state of unlocked
+          if (event.target.locked === undefined) {
+              event.target.locked = false;
+          }
+          // toggle locked state
+          event.target.locked = event.target.locked ? false : true;
+
+          if (event.target.locked === false) {
+              event.target.src = "/static/workspace/unlocked.png";
+          } else {
+              event.target.src = "/static/workspace/locked.png";
+          }
+
+          code_uploader.toggle_monitor(event.target.locked);
+      });
     </script>
   </body>
 </html>

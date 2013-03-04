@@ -6,14 +6,13 @@ A web interface to pyinstaller running under wine.
 import uuid
 import re
 import base64
-import struct
-import zlib
 import zipfile
 import logging
 import os
 
 from sh import cd, mkdir, rm, pyinstaller_win
 from flask import Flask, render_template, redirect, url_for, request, Response, send_from_directory
+from werkzeug import secure_filename
 
 import fastlz
 
@@ -79,46 +78,32 @@ def download(fileid, filename):
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    filename = request.files['Filedata'].filename
-    body = request.files['Filedata'].read()
+    f = request.files['file']
+
+    filename = secure_filename(f.filename)
+
+    print filename
 
     pattern = '^([^<>:"/\|?*]+)\.py$'
     m = re.search(pattern, filename)
     if not m:
         logging.error("upload filename error")
         return "upload filename error"
+
     filebase = m.group(1)
     filename_py = filebase+'.py'
     filename_exe = filebase+'.exe'
 
     logging.info('processing: ' + filebase)
 
-    len_wire = len(body)
-    len_data = 0
-
-    decoded = base64.b64decode(body)
-    size = struct.unpack(">I", decoded[:4])[0]
-    checksum = struct.unpack(">I", decoded[4:8])[0]
-    # zlib.adler32 returns a signed checksum
-    if checksum > 2147483647:
-        checksum -= 4294967296
-    compressed = decoded[8:]
-    uncompressed = fastlz.decompress(compressed, size)
-    if zlib.adler32(uncompressed) != checksum:
-        raise IndexError ("checksum error")
-    len_data += len(uncompressed)
-
-    if len_data:
-        logging.info('compression: {len_wire}/{len_data} = {compression}%'.format(len_wire=len_wire, len_data=len_data, compression=int(100.0 * float(len_wire)/float(len_data))))
-    else:
-        logging.info('compression: {len_wire}/{len_data} = {compression}%'.format(len_wire=len_wire, len_data=len_data, compression='inf'))
-        
     fileid = base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip('=')
+
     cd('/tmp')
     mkdir('piww_'+fileid)
     cd('piww_'+fileid)
-    with file('/tmp/piww_'+fileid+'/'+filename_py, 'w') as f:
-        f.write(uncompressed)
+
+    f.save('/tmp/piww_'+fileid+'/'+filename_py)
+
     # pyinstaller-win is a wrapper to wine running python.exe pyinstaller
     #  it takes a python file as a parameter and outputs an exe file in 'dist'
     pyinstaller_win(filename_py)
